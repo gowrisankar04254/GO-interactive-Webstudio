@@ -1,0 +1,590 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>go-interactive web studio</title>
+  <!-- Font Awesome & Google Fonts -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --card-bg: #f8fafc;
+      --text-color: #0f172a;
+      --text-secondary: #475569;
+      --border-color: #e2e8f0;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --accent-glow: rgba(37, 99, 235, 0.12);
+      --success-color: #10b981;
+      --input-bg: #ffffff;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0b0f19;
+      --card-bg: #151c2c;
+      --text-color: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border-color: #1e293b;
+      --primary-color: #3b82f6;
+      --primary-hover: #60a5fa;
+      --accent-glow: rgba(59, 130, 246, 0.15);
+      --input-bg: #0b0f19;
+    }
+
+    [data-theme="dim"] {
+      --bg-color: #1e293b;
+      --card-bg: #334155;
+      --text-color: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --border-color: #475569;
+      --primary-color: #38bdf8;
+      --primary-hover: #7dd3fc;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --input-bg: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.25s, color 0.25s, border-color 0.25s, transform 0.2s;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: 0.92rem;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 30px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.4px;
+    }
+
+    .theme-controls {
+      display: flex;
+      gap: 4px;
+      background: var(--card-bg);
+      padding: 3px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .theme-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-color);
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+
+    .theme-btn.active {
+      background: var(--primary-color);
+      color: #fff;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 20px auto;
+      padding: 0 20px;
+      flex: 1;
+      width: 100%;
+    }
+
+    .step-container {
+      display: none;
+      animation: fadeIn 0.35s ease-in-out forwards;
+    }
+
+    .step-container.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .hero-subtitle {
+      text-align: center;
+      color: var(--text-secondary);
+      margin-bottom: 25px;
+      font-size: 0.88rem;
+    }
+
+    /* Grid for Desktop / Responsive Website Selection */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 25px;
+    }
+
+    @media (max-width: 850px) {
+      .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      padding: 22px 16px;
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: var(--primary-color);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px var(--accent-glow);
+    }
+
+    .card.selected {
+      border-color: var(--primary-color);
+      background: var(--accent-glow);
+    }
+
+    .service-icon {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      line-height: 1.35;
+    }
+
+    /* Form Design */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 25px 30px;
+      box-shadow: 0 10px 25px var(--accent-glow);
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .form-header {
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .back-btn {
+      background: transparent;
+      border: none;
+      color: var(--primary-color);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .form-group input {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--input-bg);
+      color: var(--text-color);
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary-color);
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+    }
+
+    /* Payment Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+
+    .modal-content {
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 22px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .qr-frame {
+      background: white;
+      padding: 10px;
+      border-radius: 12px;
+      display: inline-block;
+      margin: 12px 0;
+      border: 2px dashed var(--primary-color);
+    }
+
+    .qr-box img {
+      width: 140px;
+      height: 140px;
+      display: block;
+    }
+
+    .fee-badge {
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.78rem;
+      display: inline-block;
+    }
+
+    .success-text {
+      color: var(--success-color);
+      font-weight: 700;
+      display: none;
+      margin-top: 10px;
+      padding: 8px;
+      background: rgba(16, 185, 129, 0.15);
+      border-radius: 6px;
+      font-size: 0.82rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <div class="navbar">
+    <div class="brand">
+      <i class="fa-solid fa-layer-group"></i> go-interactive web studio
+    </div>
+    <div class="theme-controls">
+      <button class="theme-btn active" onclick="setTheme('light', this)">Light</button>
+      <button class="theme-btn" onclick="setTheme('dim', this)">Dim</button>
+      <button class="theme-btn" onclick="setTheme('dark', this)">Dark</button>
+    </div>
+  </div>
+
+  <div class="container">
+    
+    <!-- STEP 1: Select Website Type -->
+    <div id="step1" class="step-container active">
+      <h1 class="hero-title">Select Website Category</h1>
+      <p class="hero-subtitle">Choose the web architecture type you want go-interactive web studio to build for you.</p>
+
+      <div class="services-grid">
+        <div class="card" onclick="selectWebsiteType(this, 'Business Landing Page')">
+          <i class="fa-solid fa-rocket service-icon"></i>
+          <div class="card-title">Business Landing Page</div>
+          <div class="card-desc">High-converting landing page built for business representation.</div>
+        </div>
+
+        <div class="card" onclick="selectWebsiteType(this, 'E-Commerce Store Portal')">
+          <i class="fa-solid fa-bag-shopping service-icon"></i>
+          <div class="card-title">E-Commerce Store</div>
+          <div class="card-desc">Full product gallery, shopping cart, and order processing workflow.</div>
+        </div>
+
+        <div class="card" onclick="selectWebsiteType(this, 'Portfolio & Agency Website')">
+          <i class="fa-solid fa-briefcase service-icon"></i>
+          <div class="card-title">Portfolio Site</div>
+          <div class="card-desc">Showcase dynamic work, projects, and agency services.</div>
+        </div>
+
+        <div class="card" onclick="selectWebsiteType(this, 'Custom Web Application')">
+          <i class="fa-solid fa-code service-icon"></i>
+          <div class="card-title">Custom Web App</div>
+          <div class="card-desc">Tailored dynamic web platform built for specialized business needs.</div>
+        </div>
+      </div>
+
+      <button class="btn" style="max-width: 320px; margin: 0 auto;" onclick="goToStep(2)">Next: Enter Details <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+
+    <!-- STEP 2: User Details Form -->
+    <div id="step2" class="step-container">
+      <div class="form-card">
+        <div class="form-header">
+          <button class="back-btn" onclick="goToStep(1)"><i class="fa-solid fa-arrow-left"></i> Change Selection</button>
+          <span class="fee-badge" id="selectedBadge">Selected: Landing Page</span>
+        </div>
+
+        <h2 style="margin-bottom: 4px; font-size: 1.25rem;">Client Registration</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.82rem;">Fill out your details to generate your web project specification.</p>
+
+        <form id="detailsForm" onsubmit="openPaymentModal(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" id="custName" required placeholder="Enter full name">
+            </div>
+            <div class="form-group">
+              <label>Email Address *</label>
+              <input type="email" id="custEmail" required placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+              <label>Location / City *</label>
+              <input type="text" id="custLocation" required placeholder="Tirupati">
+            </div>
+            <div class="form-group">
+              <label>Mobile Number *</label>
+              <input type="tel" id="custMobile" required placeholder="10-digit mobile number">
+            </div>
+            <div class="form-group full-width">
+              <label>Company / Brand Name</label>
+              <input type="text" id="custCompany" placeholder="Your Business / Organization Name">
+            </div>
+          </div>
+
+          <button type="submit" class="btn">Proceed to Pay ₹10 Processing Fee <i class="fa-solid fa-qrcode"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Payment Modal & Scanner -->
+  <div class="modal" id="paymentModal">
+    <div class="modal-content">
+      <h3 style="font-size: 1.15rem;">Scan & Pay ₹10 Processing Fee</h3>
+      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Scan via Google Pay, PhonePe, or Paytm</p>
+      
+      <div class="qr-frame">
+        <div class="qr-box">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi://pay?pa=merchant@upi&pn=go-interactive%20web%20studio&am=10&cu=INR" alt="UPI QR">
+        </div>
+      </div>
+      
+      <div>
+        <span class="fee-badge">Merchant UPI: merchant@upi</span>
+      </div>
+
+      <div class="form-group" style="text-align: left; margin-top: 15px;">
+        <label>Enter Payment UTR / Transaction ID *</label>
+        <input type="text" id="utrNumber" placeholder="12-digit UPI UTR / Ref ID">
+      </div>
+      
+      <button class="btn btn-secondary" style="margin-top: 8px; padding: 10px;" onclick="verifyPaymentId()">Auto-Verify Payment</button>
+      <div id="successMsg" class="success-text"><i class="fa-solid fa-circle-check"></i> Payment Verified Successfully!</div>
+
+      <button id="finalSubmitBtn" class="btn" style="margin-top: 12px; opacity: 0.5; pointer-events: none;" onclick="submitFinalOrder()">Submit Order</button>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 go-interactive web studio. All rights reserved.
+  </footer>
+
+  <!-- Firebase Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_FIREBASE_API_KEY",
+      authDomain: "go-interactive-webstudio.firebaseapp.com",
+      projectId: "go-interactive-webstudio",
+      storageBucket: "go-interactive-webstudio.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let selectedType = '';
+    let formData = {};
+
+    window.setTheme = function(theme, btn) {
+      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if(theme === 'light') document.documentElement.removeAttribute('data-theme');
+      else document.documentElement.setAttribute('data-theme', theme);
+    };
+
+    window.selectWebsiteType = function(element, type) {
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+      element.classList.add('selected');
+      selectedType = type;
+    };
+
+    window.goToStep = function(stepNum) {
+      if(stepNum === 2 && !selectedType) {
+        alert('Please select a website category first!');
+        return;
+      }
+      if(stepNum === 2) {
+        document.getElementById('selectedBadge').innerText = 'Selected: ' + selectedType;
+      }
+      document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+      document.getElementById('step' + stepNum).classList.add('active');
+    };
+
+    window.openPaymentModal = function(e) {
+      e.preventDefault();
+      formData = {
+        name: document.getElementById('custName').value,
+        email: document.getElementById('custEmail').value,
+        location: document.getElementById('custLocation').value,
+        company: document.getElementById('custCompany').value || 'N/A',
+        mobile: document.getElementById('custMobile').value,
+        websiteType: selectedType,
+        amount: 10,
+        status: "Pending Verification"
+      };
+      document.getElementById('paymentModal').style.display = 'flex';
+    };
+
+    window.verifyPaymentId = function() {
+      const utr = document.getElementById('utrNumber').value.trim();
+      if(utr.length < 8) {
+        alert('Please enter a valid UTR transaction ID.');
+        return;
+      }
+
+      document.getElementById('successMsg').style.display = 'block';
+      const finalBtn = document.getElementById('finalSubmitBtn');
+      finalBtn.style.opacity = '1';
+      finalBtn.style.pointerEvents = 'auto';
+    };
+
+    window.submitFinalOrder = async function() {
+      const utr = document.getElementById('utrNumber').value.trim();
+      try {
+        await addDoc(collection(db, "orders"), {
+          ...formData,
+          utrNumber: utr,
+          createdAt: serverTimestamp()
+        });
+        
+        alert('Order successfully submitted to go-interactive web studio!');
+        document.getElementById('paymentModal').style.display = 'none';
+        location.reload();
+      } catch (err) {
+        console.error(err);
+        alert('Error submitting order. Please check configuration.');
+      }
+    };
+  </script>
+</body>
+</html>

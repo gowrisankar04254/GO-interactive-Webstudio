@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -393,9 +393,9 @@
         </div>
 
         <h2 style="margin-bottom: 4px; font-size: 1.25rem;">Client Registration</h2>
-        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.82rem;">Fill out your details to submit your web project request directly.</p>
+        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.82rem;">Fill out your details to submit your web project request to database.</p>
 
-        <form id="detailsForm" onsubmit="submitDirectOrder(event)">
+        <form id="detailsForm" onsubmit="submitDatabaseOrder(event)">
           <div class="form-grid">
             <div class="form-group">
               <label>Full Name *</label>
@@ -419,7 +419,7 @@
             </div>
           </div>
 
-          <button type="submit" class="btn">Submit Order & Contact via WhatsApp <i class="fa-brands fa-whatsapp"></i></button>
+          <button type="submit" class="btn">Submit Order to Database <i class="fa-solid fa-cloud-arrow-up"></i></button>
         </form>
       </div>
     </div>
@@ -473,7 +473,7 @@
       document.getElementById('step' + stepNum).classList.add('active');
     };
 
-    window.submitDirectOrder = async function(e) {
+    window.submitDatabaseOrder = async function(e) {
       e.preventDefault();
       
       const name = document.getElementById('custName').value.trim();
@@ -489,27 +489,18 @@
         mobile,
         company,
         websiteType: selectedType,
+        amount: 10,
         status: "New Request",
         createdAt: serverTimestamp()
       };
 
       try {
-        // Save to Firebase database
         await addDoc(collection(db, "orders"), orderData);
-
-        // Redirect to WhatsApp with pre-filled message
-        const adminWhatsAppNumber = "917799563932"; // Nuvvu ichina number ikkada set cheyabadindi
-        const message = `Hello, I want to order a website.\n\n*Name:* ${name}\n*Service:* ${selectedType}\n*Mobile:* ${mobile}\n*Location:* ${location}\n*Company:* ${company}`;
-        const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(message)}`;
-
-        alert('Order saved successfully! Redirecting to WhatsApp to complete details and payment.');
-        window.location.href = whatsappUrl;
+        alert('Order successfully saved to database! You can now check it in your admin console.');
+        location.reload();
       } catch (err) {
         console.error(err);
-        alert('Error saving order, but you can still contact via WhatsApp.');
-        const adminWhatsAppNumber = "917799563932";
-        const message = `Hello, I want to order a website (${selectedType}) for ${name}.`;
-        window.location.href = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(message)}`;
+        alert('Error saving order to database. Please check Firestore rules.');
       }
     };
   </script>

@@ -315,49 +315,6 @@
       background: var(--primary-hover);
     }
 
-    .btn-secondary {
-      background: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-color);
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(6px);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 15px;
-    }
-
-    .modal-content {
-      background: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 18px;
-      padding: 22px;
-      max-width: 360px;
-      width: 100%;
-      text-align: center;
-    }
-
-    .qr-frame {
-      background: white;
-      padding: 10px;
-      border-radius: 12px;
-      display: inline-block;
-      margin: 12px 0;
-      border: 2px dashed var(--primary-color);
-    }
-
-    .qr-box img {
-      width: 140px;
-      height: 140px;
-      display: block;
-    }
-
     .fee-badge {
       background: #dbeafe;
       color: #1e40af;
@@ -366,17 +323,6 @@
       font-weight: 700;
       font-size: 0.78rem;
       display: inline-block;
-    }
-
-    .success-text {
-      color: var(--success-color);
-      font-weight: 700;
-      display: none;
-      margin-top: 10px;
-      padding: 8px;
-      background: rgba(16, 185, 129, 0.15);
-      border-radius: 6px;
-      font-size: 0.82rem;
     }
 
     footer {
@@ -447,9 +393,9 @@
         </div>
 
         <h2 style="margin-bottom: 4px; font-size: 1.25rem;">Client Registration</h2>
-        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.82rem;">Fill out your details to generate your web project specification.</p>
+        <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.82rem;">Fill out your details to submit your web project request directly.</p>
 
-        <form id="detailsForm" onsubmit="openPaymentModal(event)">
+        <form id="detailsForm" onsubmit="submitDirectOrder(event)">
           <div class="form-grid">
             <div class="form-group">
               <label>Full Name *</label>
@@ -473,36 +419,9 @@
             </div>
           </div>
 
-          <button type="submit" class="btn">Proceed to Pay ₹10 Processing Fee <i class="fa-solid fa-qrcode"></i></button>
+          <button type="submit" class="btn">Submit Order & Contact via WhatsApp <i class="fa-brands fa-whatsapp"></i></button>
         </form>
       </div>
-    </div>
-  </div>
-
-  <div class="modal" id="paymentModal">
-    <div class="modal-content">
-      <h3 style="font-size: 1.15rem;">Scan & Pay ₹10 Processing Fee</h3>
-      <p style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Scan via Google Pay, PhonePe, or Paytm</p>
-      
-      <div class="qr-frame">
-        <div class="qr-box">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi://pay?pa=merchant@upi&pn=go-interactive%20web%20studio&am=10&cu=INR" alt="UPI QR">
-        </div>
-      </div>
-      
-      <div>
-        <span class="fee-badge">Merchant UPI: merchant@upi</span>
-      </div>
-
-      <div class="form-group" style="text-align: left; margin-top: 15px;">
-        <label>Enter Payment UTR / Transaction ID *</label>
-        <input type="text" id="utrNumber" placeholder="12-digit UPI UTR / Ref ID">
-      </div>
-      
-      <button class="btn btn-secondary" style="margin-top: 8px; padding: 10px;" onclick="verifyPaymentId()">Auto-Verify Payment</button>
-      <div id="successMsg" class="success-text"><i class="fa-solid fa-circle-check"></i> Payment Verified Successfully!</div>
-
-      <button id="finalSubmitBtn" class="btn" style="margin-top: 12px; opacity: 0.5; pointer-events: none;" onclick="submitFinalOrder()">Submit Order</button>
     </div>
   </div>
 
@@ -528,7 +447,6 @@
     const db = getFirestore(app);
 
     let selectedType = '';
-    let formData = {};
 
     window.setTheme = function(theme, btn) {
       document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
@@ -555,49 +473,43 @@
       document.getElementById('step' + stepNum).classList.add('active');
     };
 
-    window.openPaymentModal = function(e) {
+    window.submitDirectOrder = async function(e) {
       e.preventDefault();
-      formData = {
-        name: document.getElementById('custName').value,
-        email: document.getElementById('custEmail').value,
-        location: document.getElementById('custLocation').value,
-        company: document.getElementById('custCompany').value || 'N/A',
-        mobile: document.getElementById('custMobile').value,
+      
+      const name = document.getElementById('custName').value.trim();
+      const email = document.getElementById('custEmail').value.trim();
+      const location = document.getElementById('custLocation').value.trim();
+      const mobile = document.getElementById('custMobile').value.trim();
+      const company = document.getElementById('custCompany').value.trim() || 'N/A';
+
+      const orderData = {
+        name,
+        email,
+        location,
+        mobile,
+        company,
         websiteType: selectedType,
-        amount: 10,
-        status: "Pending Verification"
+        status: "New Request",
+        createdAt: serverTimestamp()
       };
-      document.getElementById('paymentModal').style.display = 'flex';
-    };
 
-    window.verifyPaymentId = function() {
-      const utr = document.getElementById('utrNumber').value.trim();
-      if(utr.length < 8) {
-        alert('Please enter a valid UTR transaction ID.');
-        return;
-      }
-
-      document.getElementById('successMsg').style.display = 'block';
-      const finalBtn = document.getElementById('finalSubmitBtn');
-      finalBtn.style.opacity = '1';
-      finalBtn.style.pointerEvents = 'auto';
-    };
-
-    window.submitFinalOrder = async function() {
-      const utr = document.getElementById('utrNumber').value.trim();
       try {
-        await addDoc(collection(db, "orders"), {
-          ...formData,
-          utrNumber: utr,
-          createdAt: serverTimestamp()
-        });
-        
-        alert('Order successfully submitted to go-interactive web studio!');
-        document.getElementById('paymentModal').style.display = 'none';
-        location.reload();
+        // Save to Firebase database
+        await addDoc(collection(db, "orders"), orderData);
+
+        // Redirect to WhatsApp with pre-filled message
+        const adminWhatsAppNumber = "917799563932"; // Nuvvu ichina number ikkada set cheyabadindi
+        const message = `Hello, I want to order a website.\n\n*Name:* ${name}\n*Service:* ${selectedType}\n*Mobile:* ${mobile}\n*Location:* ${location}\n*Company:* ${company}`;
+        const whatsappUrl = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(message)}`;
+
+        alert('Order saved successfully! Redirecting to WhatsApp to complete details and payment.');
+        window.location.href = whatsappUrl;
       } catch (err) {
         console.error(err);
-        alert('Error submitting order. Please check configuration.');
+        alert('Error saving order, but you can still contact via WhatsApp.');
+        const adminWhatsAppNumber = "917799563932";
+        const message = `Hello, I want to order a website (${selectedType}) for ${name}.`;
+        window.location.href = `https://wa.me/${adminWhatsAppNumber}?text=${encodeURIComponent(message)}`;
       }
     };
   </script>

@@ -1,0 +1,566 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>go-interactive web studio - Admin Portal</title>
+  <!-- Font Awesome & Google Fonts -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --card-bg: #f8fafc;
+      --text-color: #0f172a;
+      --text-secondary: #475569;
+      --border-color: #e2e8f0;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
+      --accent-glow: rgba(37, 99, 235, 0.12);
+      --danger-color: #ef4444;
+      --success-color: #10b981;
+      --input-bg: #ffffff;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0b0f19;
+      --card-bg: #151c2c;
+      --text-color: #f8fafc;
+      --text-secondary: #94a3b8;
+      --border-color: #1e293b;
+      --primary-color: #3b82f6;
+      --primary-hover: #60a5fa;
+      --accent-glow: rgba(59, 130, 246, 0.15);
+      --input-bg: #0b0f19;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.25s, color 0.25s, border-color 0.25s;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: 0.92rem;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 30px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.4px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-link {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.8rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-link:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .theme-controls {
+      display: flex;
+      gap: 4px;
+      background: var(--card-bg);
+      padding: 3px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .theme-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-color);
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+
+    .theme-btn.active {
+      background: var(--primary-color);
+      color: #fff;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 20px auto;
+      padding: 0 20px;
+      flex: 1;
+      width: 100%;
+    }
+
+    /* Login Screen Overlay */
+    .login-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--bg-color);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 30px;
+      max-width: 380px;
+      width: 100%;
+      box-shadow: 0 10px 25px var(--accent-glow);
+      text-align: center;
+    }
+
+    .login-icon {
+      font-size: 2.2rem;
+      color: var(--primary-color);
+      margin-bottom: 12px;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-top: 15px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--input-bg);
+      color: var(--text-color);
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary-color);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .btn-login:hover {
+      background: var(--primary-hover);
+    }
+
+    .error-msg {
+      color: var(--danger-color);
+      font-size: 0.8rem;
+      margin-top: 10px;
+      display: none;
+      font-weight: 600;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 25px;
+    }
+
+    @media (max-width: 650px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 18px;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .stat-title {
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-color);
+    }
+
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px var(--accent-glow);
+    }
+
+    .table-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .table-header h2 {
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .btn-refresh {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-refresh:hover {
+      background: var(--primary-hover);
+    }
+
+    .table-responsive {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(0, 0, 0, 0.03);
+      padding: 12px 18px;
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    [data-theme="dark"] th {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.85rem;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-block;
+      background: rgba(37, 99, 235, 0.15);
+      color: var(--primary-color);
+    }
+
+    .btn-reject {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--danger-color);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-reject:hover {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .empty-state {
+      padding: 40px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ADMIN LOGIN OVERLAY -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <i class="fa-solid fa-lock login-icon"></i>
+      <h2 style="font-size: 1.2rem; font-weight: 800;">Admin Authentication</h2>
+      <p style="color: var(--text-secondary); font-size: 0.78rem; margin-top: 4px;">Enter credentials to access studio console</p>
+
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Admin Username / Email</label>
+          <input type="text" id="adminUser" required placeholder="Enter admin username">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="adminPass" required placeholder="Enter password">
+        </div>
+        <div class="error-msg" id="loginError">Invalid Username or Password!</div>
+        <button type="submit" class="btn-login">Login to Console</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <div class="navbar">
+    <div class="brand">
+      <i class="fa-solid fa-user-shield"></i> go-interactive Admin Portal
+    </div>
+    <div class="nav-actions">
+      <a href="index.html" class="btn-link">
+        <i class="fa-solid fa-globe"></i> Main Website
+      </a>
+      <div class="theme-controls">
+        <button class="theme-btn active" onclick="setTheme('light', this)">Light</button>
+        <button class="theme-btn" onclick="setTheme('dark', this)">Dark</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">Total Orders</div>
+        <div class="stat-number" id="totalOrdersCount">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Fee Revenue</div>
+        <div class="stat-number" id="totalRevenue">₹0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Console Status</div>
+        <div class="stat-number" style="color: var(--success-color); font-size: 1.1rem;">Authenticated</div>
+      </div>
+    </div>
+
+    <!-- Orders Management Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <h2>Client Submissions</h2>
+        <button class="btn-refresh" onclick="loadOrders()">
+          <i class="fa-solid fa-rotate-right"></i> Refresh Data
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Client Name</th>
+              <th>Contact & Location</th>
+              <th>Website Category</th>
+              <th>UTR Ref ID</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr>
+              <td colspan="5" class="empty-state">Loading studio order records...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    &copy; 2026 go-interactive web studio. Admin Dashboard.
+  </footer>
+
+  <!-- Firebase Integration & Authentication Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_FIREBASE_API_KEY",
+      authDomain: "go-interactive-webstudio.firebaseapp.com",
+      projectId: "go-interactive-webstudio",
+      storageBucket: "go-interactive-webstudio.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Login Authentication Function
+    window.handleLogin = function(e) {
+      e.preventDefault();
+      const user = document.getElementById('adminUser').value.trim();
+      const pass = document.getElementById('adminPass').value.trim();
+
+      if(user === "admin@7799563932" && pass === "7799563932") {
+        document.getElementById('loginOverlay').style.display = 'none';
+        window.loadOrders();
+      } else {
+        document.getElementById('loginError').style.display = 'block';
+      }
+    };
+
+    window.setTheme = function(theme, btn) {
+      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if(theme === 'light') document.documentElement.removeAttribute('data-theme');
+      else document.documentElement.setAttribute('data-theme', theme);
+    };
+
+    window.loadOrders = async function() {
+      const tbody = document.getElementById('ordersTableBody');
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Loading studio order records...</td></tr>`;
+
+      try {
+        const querySnapshot = await getDocs(collection(db, "orders"));
+        tbody.innerHTML = '';
+
+        if(querySnapshot.empty) {
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No active orders found in database.</td></tr>`;
+          document.getElementById('totalOrdersCount').innerText = '0';
+          document.getElementById('totalRevenue').innerText = '₹0';
+          return;
+        }
+
+        let count = 0;
+        querySnapshot.forEach((docSnap) => {
+          count++;
+          const data = docSnap.data();
+          const docId = docSnap.id;
+
+          tbody.innerHTML += `
+            <tr>
+              <td>
+                <b>${data.name}</b><br>
+                <span style="color: var(--text-secondary); font-size: 0.78rem;">${data.company || 'Personal'}</span>
+              </td>
+              <td>
+                ${data.mobile}<br>
+                <span style="color: var(--text-secondary); font-size: 0.78rem;">${data.email} | ${data.location}</span>
+              </td>
+              <td><span class="badge">${data.websiteType}</span></td>
+              <td><code style="color: var(--primary-color); font-weight: 700;">${data.utrNumber || 'N/A'}</code></td>
+              <td>
+                <button class="btn-reject" onclick="rejectAndClean('${docId}')">
+                  <i class="fa-solid fa-trash"></i> Reject & Delete
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+
+        document.getElementById('totalOrdersCount').innerText = count;
+        document.getElementById('totalRevenue').innerText = '₹' + (count * 10);
+
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state" style="color: var(--danger-color);">Failed to load orders. Check Firebase config.</td></tr>`;
+      }
+    };
+
+    window.rejectAndClean = async function(docId) {
+      if(confirm('Are you sure you want to reject this order and clean it from database storage?')) {
+        try {
+          await deleteDoc(doc(db, "orders", docId));
+          alert('Order rejected and storage cleaned successfully!');
+          loadOrders();
+        } catch (err) {
+          console.error(err);
+          alert('Error rejecting order.');
+        }
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,5 +1,4 @@
-
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -86,6 +85,26 @@
       letter-spacing: -0.4px;
     }
 
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .admin-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .admin-link:hover {
+      color: var(--primary-color);
+    }
+
     .theme-controls {
       display: flex;
       gap: 4px;
@@ -147,7 +166,6 @@
       font-size: 0.88rem;
     }
 
-    /* Grid for Desktop / Responsive Website Selection */
     .services-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -206,7 +224,6 @@
       line-height: 1.35;
     }
 
-    /* Form Design */
     .form-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -304,7 +321,6 @@
       color: var(--text-color);
     }
 
-    /* Payment Modal */
     .modal {
       display: none;
       position: fixed;
@@ -374,21 +390,22 @@
 </head>
 <body>
 
-  <!-- Top Navigation Header -->
   <div class="navbar">
     <div class="brand">
       <i class="fa-solid fa-layer-group"></i> go-interactive web studio
     </div>
-    <div class="theme-controls">
-      <button class="theme-btn active" onclick="setTheme('light', this)">Light</button>
-      <button class="theme-btn" onclick="setTheme('dim', this)">Dim</button>
-      <button class="theme-btn" onclick="setTheme('dark', this)">Dark</button>
+    <div class="nav-right">
+      <a href="admin.html" class="admin-link"><i class="fa-solid fa-lock"></i> Admin</a>
+      <div class="theme-controls">
+        <button class="theme-btn active" onclick="setTheme('light', this)">Light</button>
+        <button class="theme-btn" onclick="setTheme('dim', this)">Dim</button>
+        <button class="theme-btn" onclick="setTheme('dark', this)">Dark</button>
+      </div>
     </div>
   </div>
 
   <div class="container">
     
-    <!-- STEP 1: Select Website Type -->
     <div id="step1" class="step-container active">
       <h1 class="hero-title">Select Website Category</h1>
       <p class="hero-subtitle">Choose the web architecture type you want go-interactive web studio to build for you.</p>
@@ -422,7 +439,6 @@
       <button class="btn" style="max-width: 320px; margin: 0 auto;" onclick="goToStep(2)">Next: Enter Details <i class="fa-solid fa-arrow-right"></i></button>
     </div>
 
-    <!-- STEP 2: User Details Form -->
     <div id="step2" class="step-container">
       <div class="form-card">
         <div class="form-header">
@@ -463,7 +479,6 @@
     </div>
   </div>
 
-  <!-- STEP 3: Payment Modal & Scanner -->
   <div class="modal" id="paymentModal">
     <div class="modal-content">
       <h3 style="font-size: 1.15rem;">Scan & Pay ₹10 Processing Fee</h3>
@@ -495,18 +510,18 @@
     &copy; 2026 go-interactive web studio. All rights reserved.
   </footer>
 
-  <!-- Firebase Scripts -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "YOUR_FIREBASE_API_KEY",
+      apiKey: "AIzaSyCrL4m-liAHlgF4wV-6LMRg1PYAIpAz6kw",
       authDomain: "go-interactive-webstudio.firebaseapp.com",
       projectId: "go-interactive-webstudio",
-      storageBucket: "go-interactive-webstudio.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      storageBucket: "go-interactive-webstudio.firebasestorage.app",
+      messagingSenderId: "95978136670",
+      appId: "1:95978136670:web:fe15aed741927d8ab280cf",
+      measurementId: "G-JR83X9F9SG"
     };
 
     const app = initializeApp(firebaseConfig);
